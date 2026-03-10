@@ -1,0 +1,35 @@
+<?php
+// Start session if not started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Guide Connect</title>
+
+    <!-- Link your CSS -->
+    <link rel="stylesheet" href="../assets/css/style.css"> <!-- Adjust path if needed -->
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <!-- Logo (optional) -->
+        <a href="../index.php">
+            <img src="../images/Tlogo.jpeg" alt="Travel Guide Connect Logo" class="logo">
+        </a>
+
+        <!-- Optional Navigation -->
+        <nav>
+            <ul>
+                <li><a href="../index.php">Home</a></li>
+                <li><a href="login.php">Login</a></li>
+                <li><a href="register.php">Register</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
