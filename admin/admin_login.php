@@ -1,21 +1,25 @@
 <?php
 session_start();
-include("../database/db.php"); // adjust path if needed
+// Using your established path and variable
+include("../includes/db.php"); 
 
 if(isset($_POST['login'])){
-    $email = $_POST['email'];
+    // Sanitize input to prevent SQL Injection
+    $email = mysqli_real_escape_string($link, $_POST['email']);
     $password = $_POST['password'];
 
+    // Change $conn to $link to match your db.php
     $query = "SELECT * FROM admins WHERE email='$email'";
-    $result = mysqli_query($conn,$query);
+    $result = mysqli_query($link, $query);
     $admin = mysqli_fetch_assoc($result);
 
     if($admin && password_verify($password, $admin['password'])){
-        $_SESSION['admin'] = $email;
+        $_SESSION['admin_id'] = $admin['id'];
+        $_SESSION['admin_email'] = $admin['email'];
         header("Location: dashboard.php");
         exit();
     } else {
-        $error = "Invalid email or password";
+        $error = "Invalid credentials. Please try again.";
     }
 }
 ?>
