@@ -78,20 +78,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 </head>
 <body>
     <div class="container">
-        <h2>Create Account</h2>
+        <div class="login-card">
+          <h2>Create Account</h2>
         <form action="signup.php" method="post">
-            <input type="text" name="name" placeholder="Full Name" required>
-            <span class="error"><?php echo $name_err; ?></span>
+            <div class="input-group">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <span class="error"><?php echo $name_err; ?></span><br><br>
+                <input type="email" name="email" placeholder="Email" required>
+                <span class="error"><?php echo $email_err; ?></span><br><br>
             
-            <input type="email" name="email" placeholder="Email" required>
-            <span class="error"><?php echo $email_err; ?></span>
-            
-            <input type="password" name="password" placeholder="Password" required>
-            <span class="error"><?php echo $password_err; ?></span>
-            
-            <button type="submit">Sign Up</button>
-            <p>Already have an account? <a href="login.php">Login here</a>.</p>
+                <input type="password" name="password" placeholder="Password" required>
+                <span class="error"><?php echo $password_err; ?></span>
+              <div class="btn-signup">
+                 <button class="btn-1" type="submit">Sign Up</button>
+              </div>
+               
+                 <p>Already have an account? <a href="login.php">Login here</a>.</p>
+            </div>
         </form>
+        </div>
+        
     </div>
 </body>
 </html>
