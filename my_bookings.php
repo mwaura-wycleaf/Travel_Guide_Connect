@@ -90,9 +90,16 @@ $result = mysqli_query($link, $sql);
                 </div>
 
                 <div class="status-container">
-                    <span class="status-badge <?php echo $row['status']; ?>">
-                        <?php echo $row['status']; ?>
-                    </span>
+                  <span class="status-badge <?php echo $row['status']; ?>">
+                   <?php echo $row['status']; ?>
+                 </span>
+    
+                    <?php if($row['status'] == 'Confirmed'): ?>
+                        <a href="post_review.php?attraction_id=<?php echo $row['attraction_id']; ?>&guide_id=<?php echo $row['guide_id']; ?>" 
+                        style="display: block; margin-top: 10px; font-size: 0.8rem; color: #27ae60; text-decoration: none; font-weight: bold;">
+                        <i class="fas fa-pen"></i> Leave a Review
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endwhile; ?>

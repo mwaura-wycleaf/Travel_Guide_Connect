@@ -1,201 +1,117 @@
-<?php 
+<?php
 session_start();
-// Include the database connection just in case you want to fetch dynamic data later
-include 'includes/db.php'; 
+include("includes/db.php");
+include("includes/header.php"); // Assuming your header has the nav bar
+
+// 1. Fetch Featured Attractions (limit to 3 or 6)
+$attr_res = mysqli_query($link, "SELECT * FROM attractions LIMIT 6");
+
+// 2. Fetch Recent Reviews to display as Testimonials
+$rev_res = mysqli_query($link, "SELECT r.*, a.name as attraction_name 
+                                FROM reviews r 
+                                JOIN attractions a ON r.attraction_id = a.id 
+                                ORDER BY r.created_at DESC LIMIT 3");
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home | Travel Guide Connect</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>Travel Guide Connect | Explore Kenya</title>
     <style>
-        /* --- EMBEDDED CSS --- */
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            scroll-behavior: smooth;
-            background-color: #f8f9fa;
-        }
-
-        /* Hero Section Styling */
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: #f9f9f9; }
+        
+        /* Hero Section */
         .hero {
-            height: 80vh;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                        url('images/tconnect.background.jpg') no-repeat center center/cover;
+            height: 60vh;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('images/hero_bg.jpg');
+            background-size: cover;
+            background-position: center;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            color: white;
             text-align: center;
-            color: white;
-            padding: 0 20px;
+        }
+        .hero h1 { font-size: 3.5rem; margin: 0; }
+        .hero p { font-size: 1.2rem; margin: 10px 0 20px; }
+
+        /* Attractions Grid */
+        .container { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
+        .section-title { text-align: center; margin-bottom: 40px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        
+        .card { 
+            background: white; border-radius: 15px; overflow: hidden; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.3s; 
+        }
+        .card:hover { transform: translateY(-10px); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-body { padding: 20px; }
+        .card-body h3 { margin: 0 0 10px; color: #2c3e50; }
+        .btn-book { 
+            display: inline-block; background: #27ae60; color: white; 
+            padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; 
         }
 
-        .hero-content h1 {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        .hero-content p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-
-        .btn-primary {
-            background: #27ae60;
-            color: white;
-            padding: 15px 40px;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: 0.3s;
-            display: inline-block;
-        }
-
-        .btn-primary:hover {
-            background: #2ecc71;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        /* Services Section Styling */
-        .services {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            padding: 80px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .service-card {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            flex: 1;
-            min-width: 300px;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            transition: 0.3s;
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-        }
-
-        .service-card i {
-            font-size: 3rem;
-            color: #27ae60;
-            margin-bottom: 20px;
-        }
-
-        .service-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-
-        .service-card p {
-            color: #7f8c8d;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
-        .btn-secondary {
-            border: 2px solid #27ae60;
-            color: #27ae60;
-            padding: 10px 25px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background: #27ae60;
-            color: white;
-        }
-
-        #welcome-msg {
-            font-size: 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .hero-content h1 { font-size: 2.2rem; }
-            .service-card { min-width: 100%; }
-        }
+        /* Testimonials Section */
+        .reviews-section { background: #2c3e50; color: white; padding: 60px 0; }
+        .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .review-card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; font-style: italic; }
+        .stars { color: #f1c40f; }
     </style>
 </head>
 <body>
 
-<?php include 'includes/header.php'; ?>
-
 <section class="hero">
-    <div class="hero-content">
-        <h1>Travel Guide Connect</h1>
-        <p>Explore. Connect. Experience.</p>
-        
-        <?php if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
-            <h2 id="welcome-msg">Welcome back, <?php echo htmlspecialchars($_SESSION["name"]); ?>!</h2>
-        <?php else: ?>
-            <div class="auth-buttons">
-                <a href="auth/signup.php" class="btn-primary">Get Started</a>
+    <h1>Connect with Expert Guides</h1>
+    <p>Discover the hidden gems of Kenya with local professionals.</p>
+    <a href="#explore" class="btn-book" style="background: white; color: #27ae60; font-size: 1.1rem; padding: 15px 30px;">Start Exploring</a>
+</section>
+
+<div class="container" id="explore">
+    <div class="section-title">
+        <h2>Popular Destinations</h2>
+        <p>Handpicked places just for you</p>
+    </div>
+    
+    <div class="grid">
+        <?php while($row = mysqli_fetch_assoc($attr_res)): ?>
+        <div class="card">
+            <img src="images/<?php echo $row['image']; ?>" onerror="this.src='images/default.jpg'">
+            <div class="card-body">
+                <h3><?php echo htmlspecialchars($row['name']); ?></h3>
+                <p style="color: #7f8c8d; font-size: 0.9rem;"><?php echo substr($row['description'], 0, 100); ?>...</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <span style="font-weight: bold; color: #27ae60;">KES <?php echo number_format($row['price']); ?></span>
+                    <a href="attraction_details.php?id=<?php echo $row['id']; ?>" class="btn-book">View Details</a>
+                </div>
             </div>
-        <?php endif; ?>
+        </div>
+        <?php endwhile; ?>
+    </div>
+</div>
+
+<section class="reviews-section">
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 40px;">What Travelers Say</h2>
+        <div class="review-grid">
+            <?php while($rev = mysqli_fetch_assoc($rev_res)): ?>
+            <div class="review-card">
+                <div class="stars">
+                    <?php for($i=0; $i<$rev['rating']; $i++) echo "★"; ?>
+                </div>
+                <p>"<?php echo htmlspecialchars($rev['comment']); ?>"</p>
+                <small>— <?php echo htmlspecialchars($rev['user_name']); ?> at <strong><?php echo $rev['attraction_name']; ?></strong></small>
+            </div>
+            <?php endwhile; ?>
+        </div>
     </div>
 </section>
 
-<section class="services">
-    <div class="service-card" id="attractions-card">
-        <i class="fas fa-map-marked-alt"></i>
-        <h3>Attractions</h3>
-        <p>Discover top Kenyan destinations, from the peak of Mt. Kenya to the beaches of Diani.</p>
-        <a href="attractions.php" class="btn-secondary">Explore Now</a>
-    </div>
-
-    <div class="service-card" id="guides-card">
-        <i class="fas fa-user-tie"></i>
-        <h3>Local Guides</h3>
-        <p>Connect with expert local guides who know the hidden gems and culture of our beautiful country.</p>
-        <a href="guides.php" class="btn-secondary">Find Guides</a>
-    </div>
-</section>
-
-<script>
-    /* --- EMBEDDED JAVASCRIPT --- */
-    // Simple scroll animation for the cards
-    window.addEventListener('scroll', () => {
-        const cards = document.querySelectorAll('.service-card');
-        cards.forEach(card => {
-            const cardTop = card.getBoundingClientRect().top;
-            if(cardTop < window.innerHeight - 100) {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }
-        });
-    });
-
-    // Console log to check port for you
-    console.log("App running on Port 8080. Connection variable $link active.");
-</script>
-
-<?php include 'includes/footer.php'; ?>
+<?php include("includes/footer.php"); ?>
 
 </body>
 </html>
