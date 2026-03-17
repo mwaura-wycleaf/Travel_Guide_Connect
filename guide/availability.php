@@ -1,63 +1,112 @@
 <?php
-session_start();
-require_once "../includes/db.php";
+include("includes/guide_auth.php"); 
+include("../includes/db.php"); 
 
-if(!isset($_SESSION["loggedin"]) || $_SESSION["role"] != "guide"){
-    header("location: ../auth/guide_login.php");
-    exit();
+$guide_id = $_SESSION['guide_id'];
+$message = "";
+
+// Handle status update
+if (isset($_POST['update_status'])) {
+    $new_status = $_POST['status'];
+    $sql = "UPDATE guides SET is_available = '$new_status' WHERE id = '$guide_id'";
+    
+    if (mysqli_query($link, $sql)) {
+        $message = "<div class='alert success'>Status updated successfully!</div>";
+    } else {
+        $message = "<div class='alert error'>Failed to update status.</div>";
+    }
 }
 
-$guide_id = $_SESSION["id"];
-// Sample query: list availability (adjust table name/fields as per your DB)
-$result = mysqli_query($link, "SELECT * FROM availability WHERE guide_id='$guide_id' ORDER BY available_date ASC");
+// Fetch current status
+$res = mysqli_query($link, "SELECT is_available FROM guides WHERE id = '$guide_id'");
+$guide_data = mysqli_fetch_assoc($res);
+$current_status = $guide_data['is_available'];
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Manage Availability | Travel Guide Connect</title>
-<link rel="stylesheet" href="../assets/css/guide.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <title>My Availability | T-Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; margin: 0; display: flex; }
+        .sidebar { width: 250px; height: 100vh; background: #2c3e50; color: white; padding: 20px; position: fixed; }
+        .sidebar a { display: block; color: white; text-decoration: none; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        
+        .main-content { margin-left: 250px; padding: 40px; width: 100%; }
+        
+        .status-card { 
+            max-width: 500px; background: white; padding: 30px; border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center;
+        }
+
+        .status-indicator {
+            width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 10px;
+        }
+        .online { background: #27ae60; box-shadow: 0 0 10px #27ae60; }
+        .offline { background: #e74c3c; box-shadow: 0 0 10px #e74c3c; }
+
+        .toggle-btn {
+            display: flex; justify-content: center; gap: 10px; margin-top: 25px;
+        }
+
+        .radio-label {
+            padding: 15px 25px; border: 2px solid #ddd; border-radius: 10px;
+            cursor: pointer; transition: 0.3s; font-weight: bold;
+        }
+
+        input[type="radio"] { display: none; }
+        
+        input[value="1"]:checked + .radio-label { border-color: #27ae60; color: #27ae60; background: #e8f5e9; }
+        input[value="0"]:checked + .radio-label { border-color: #e74c3c; color: #e74c3c; background: #fff0f0; }
+
+        .btn-save {
+            margin-top: 30px; background: #2c3e50; color: white; border: none;
+            padding: 12px 40px; border-radius: 30px; cursor: pointer; font-weight: bold;
+        }
+
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
 </head>
 <body>
 
-<header>
-<div class="header-container">
-<h2>Travel Guide Connect</h2>
-<nav>
-<ul>
-<li><a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
-<li><a href="availability.php"><i class="fas fa-calendar-check"></i> Availability</a></li>
-<li><a href="manage_bookings.php"><i class="fas fa-book"></i> Bookings</a></li>
-<li><a href="reviews.php"><i class="fas fa-star"></i> Reviews</a></li>
-<li><a href="edit_profile.php"><i class="fas fa-user"></i> Profile</a></li>
-<li><a href="../auth/guide_logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-</ul>
-</nav>
+<div class="sidebar">
+    <h2>Guide Panel</h2>
+    <hr style="opacity: 0.2;">
+    <a href="dashboard.php">Dashboard</a>
+    <a href="manage_bookings.php">My Trips</a>
+    <a href="availability.php" style="background: #34495e; color: #27ae60;">Availability</a>
+    <a href="logout.php">Logout</a>
 </div>
-</header>
 
-<div class="container">
-<div class="login-card">
-<h2>Your Availability</h2>
-<a href="add_availability.php"><button class="btn-login"><i class="fas fa-plus"></i> Add New</button></a>
+<div class="main-content">
+    <h1>Manage Your Availability</h1>
+    <?php echo $message; ?>
 
-<table>
-<tr>
-<th>Date</th>
-<th>Start Time</th>
-<th>End Time</th>
-</tr>
-<?php while($row=mysqli_fetch_assoc($result)){ ?>
-<tr>
-<td><?php echo $row['available_date']; ?></td>
-<td><?php echo $row['start_time']; ?></td>
-<td><?php echo $row['end_time']; ?></td>
-</tr>
-<?php } ?>
-</table>
-</div>
+    <div class="status-card">
+        <h3>Current Status: 
+            <span class="status-indicator <?php echo $current_status ? 'online' : 'offline'; ?>"></span>
+            <?php echo $current_status ? 'Available' : 'Busy / On Trip'; ?>
+        </h3>
+        <p style="color: #7f8c8d; font-size: 0.9rem;">Updating your status helps the Admin know when to assign you to new travelers.</p>
+
+        <form method="POST">
+            <div class="toggle-btn">
+                <label>
+                    <input type="radio" name="status" value="1" <?php if($current_status) echo 'checked'; ?>>
+                    <div class="radio-label">AVAILABLE</div>
+                </label>
+                <label>
+                    <input type="radio" name="status" value="0" <?php if(!$current_status) echo 'checked'; ?>>
+                    <div class="radio-label">BUSY</div>
+                </label>
+            </div>
+            <button type="submit" name="update_status" class="btn-save">Update My Status</button>
+        </form>
+    </div>
 </div>
 
 </body>
