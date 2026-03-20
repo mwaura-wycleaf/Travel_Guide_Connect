@@ -1,20 +1,16 @@
 <?php
-// 1. Start the session
 session_start();
 
-// 2. Unset only the guide-specific session data 
-// This is safer if you have multiple logins on the same browser
+// Clear specific guide session data
 unset($_SESSION['guide_id']);
 unset($_SESSION['guide_name']);
 unset($_SESSION['role']);
 
-// 3. Clear the whole session if you want a complete wipe
+// Wipe and Destroy
 $_SESSION = array();
-
-// 4. Destroy the session on the server
 session_destroy();
 
-// 5. Redirect back to the Guide Login
-header("Location: guide_login.php?status=loggedout");
+// FIXED PATH: Go UP one level to find the login page in the guide/ folder
+header("Location:guide_login.php?status=loggedout");
 exit();
 ?>

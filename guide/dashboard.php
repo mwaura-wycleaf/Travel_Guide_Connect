@@ -1,7 +1,5 @@
 <?php
 session_start();
-
-// Protect page
 if(!isset($_SESSION['guide_id'])){
     header("Location: guide_login.php");
     exit();
@@ -11,129 +9,46 @@ if(!isset($_SESSION['guide_id'])){
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Guide Dashboard | T-Connect</title>
-
+    <title>Dashboard | T-Connect</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), 
+            background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.1)), 
                         url('../images/guide_bg.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: white;
+            background-size: cover; color: #333; min-height: 100vh;
         }
-
-        .container {
-            padding: 30px;
-        }
-
+        .container { padding: 40px; max-width: 1200px; margin: auto; }
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 20px 30px; border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-
-        .header h1 {
-            font-size: 28px;
-        }
-
         .logout-btn {
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: none;
-            background: #e74c3c;
-            color: white;
-            cursor: pointer;
-            text-decoration: none;
+            padding: 10px 25px; border-radius: 25px; background: #e74c3c;
+            color: white; text-decoration: none; font-weight: 600;
         }
-
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
         .card {
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(12px);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            transition: 0.3s;
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.9); padding: 30px; border-radius: 20px;
+            text-align: center; border: 1px solid #eee; transition: 0.3s;
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.18);
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-        }
-
-        .card a {
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-        }
-
-        .welcome {
-            margin-bottom: 25px;
-            font-size: 18px;
-            opacity: 0.9;
-        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card a { display: inline-block; margin-top: 10px; color: #27ae60; font-weight: bold; text-decoration: none; }
     </style>
 </head>
-
 <body>
-
 <div class="container">
-
     <div class="header">
         <h1>Guide Dashboard</h1>
-        <a href="../includes/guide_logout.php" class="logout-btn">Logout</a>
+        <a href="Travel_Guide_Connect\guide\iincludes\guide_logout" class="logout-btn">Logout</a>
     </div>
-
-    <div class="welcome">
-        Welcome, <?php echo $_SESSION['guide_name']; ?> 👋
-    </div>
-
+    <div style="margin: 20px 0;">Welcome, <?php echo htmlspecialchars($_SESSION['guide_name']); ?> 👋</div>
     <div class="cards">
-
-        <div class="card">
-            <h3>Manage Availability</h3>
-            <a href="availability.php">Open</a>
-        </div>
-
-        <div class="card">
-            <h3>View Bookings</h3>
-            <a href="manage_bookings.php">Open</a>
-        </div>
-
-        <div class="card">
-            <h3>Reviews</h3>
-            <a href="reviews.php">Open</a>
-        </div>
-
-        <div class="card">
-            <h3>Edit Profile</h3>
-            <a href="edit_profile.php">Open</a>
-        </div>
-
+        <div class="card"><h3>Availability</h3><a href="#">Open</a></div>
+        <div class="card"><h3>Bookings</h3><a href="#">Open</a></div>
+        <div class="card"><h3>Reviews</h3><a href="#">Open</a></div>
+        <div class="card"><h3>Profile</h3><a href="#">Open</a></div>
     </div>
-
 </div>
-
 </body>
 </html>
