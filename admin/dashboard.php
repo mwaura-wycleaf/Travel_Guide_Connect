@@ -33,17 +33,26 @@ $recent_msgs = mysqli_query($link, "SELECT * FROM contact_messages ORDER BY crea
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- EMBEDDED DASHBOARD STYLES --- */
-        body {
-            background-color: #f4f7f6;
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
+       
+        /* Ensure this matches your sidebar width */
+        .main-content {
+            margin-left: 250px; /* This creates the space for the sidebar */
+            padding: 40px;
+            background: #f4f7f6;
+            min-height: 100vh;
+            box-sizing: border-box; /* Ensures padding doesn't add to the width */
         }
 
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        /* Optional: Add a subtle transition if you ever want to hide the sidebar */
         .main-content {
-            margin-left: 260px; /* Space for your sidebar */
-            padding: 30px;
-            transition: all 0.3s;
+            transition: margin-left 0.3s ease;
         }
 
         .dashboard-header {
