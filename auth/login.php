@@ -3,7 +3,7 @@ session_start();
 
 // Redirect if already logged in
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("location: index.php");
+    header("location: ../index.php");
     exit;
 }
 
@@ -41,12 +41,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             $_SESSION["name"] = $name;
                             $_SESSION["role"] = $role;
 
-                            if($role == "admin"){
-                                header("location: admin/dashboard.php");
-                            } else {
-                                header("location: index.php");
+                           if($role == "admin"){
+                            header("location: ../admin/dashboard.php"); 
+                         } else {
+                           header("location: ../index.php"); 
                             }
-                            exit;
                         } else {
                             $password_err = "Invalid password.";
                         }
