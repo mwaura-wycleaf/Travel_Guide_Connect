@@ -140,7 +140,7 @@ $rating = ($avg_data['avg_rating']) ? number_format($avg_data['avg_rating'], 1) 
     <a href="availability.php"><i class="fas fa-calendar-check"></i> Availability</a>
     <a href="reviews.php" class="active"><i class="fas fa-star"></i> Reviews</a>
     <a href="edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a>
-    <a href="../includes/guide_logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <a href="includes/guide_logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
 </div>
 
 <div class="main-content">
