@@ -93,7 +93,7 @@ $base_url = "http://localhost:8080/Travel_Guide_Connect/";
 <header>
     <div class="header-container">
         <a href="<?php echo $base_url; ?>index.php">
-            <img src="<?php echo $base_url; ?>images/Tlogo.jpeg" alt="Logo" class="logo">
+            <img src="<?php echo $base_url; ?>images/Tlogo.png" alt="Logo" class="logo">
         </a>
 
         <nav>
