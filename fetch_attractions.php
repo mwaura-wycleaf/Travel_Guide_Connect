@@ -22,15 +22,17 @@ if (mysqli_num_rows($result) > 0) {
         <div class="attraction-card">
             <div class="attraction-image">
                 <img src="images/<?php echo htmlspecialchars($row['img_url']); ?>" 
-                     onerror="this.src='images/default.jpg';">
+                     onerror="this.src='images/default_kenya.jpg';">
             </div>
             
             <div class="attraction-details">
                 <span class="location-tag">
-                    <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($row['location']); ?>
+                    <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($row['location']); ?> County
                 </span>
+                
                 <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                <p><?php echo htmlspecialchars($row['description']); ?></p>
+                
+                <p><?php echo htmlspecialchars(substr($row['description'], 0, 100)) . '...'; ?></p>
                 
                 <a href="attraction_details.php?id=<?php echo $row['id']; ?>" class="btn-view">
                     Explore Local Guides <i class="fas fa-arrow-right"></i>
@@ -40,9 +42,11 @@ if (mysqli_num_rows($result) > 0) {
         <?php
     }
 } else {
+    // Elegant "No Results" state
     echo "<div style='grid-column: 1/-1; text-align: center; padding: 60px 20px;'>
-            <i class='fas fa-search-minus fa-3x' style='color: #ddd; margin-bottom: 15px;'></i>
-            <h3 style='color: #7f8c8d;'>No destinations start with \"" . htmlspecialchars($search) . "\"</h3>
+            <i class='fas fa-search-minus fa-3x' style='color: #bdc3c7; margin-bottom: 15px;'></i>
+            <h3 style='color: #7f8c8d;'>No destinations found matching \"" . htmlspecialchars($search) . "\"</h3>
+            <p style='color: #bdc3c7;'>Try searching for a different county or landmark.</p>
           </div>";
 }
 ?>
