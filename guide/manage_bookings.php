@@ -13,12 +13,18 @@ $guide_id = $_SESSION['guide_id'];
 // 2. FILTER LOGIC
 $filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 
+// Base SQL with JOIN to get User details
+$sql_base = "SELECT b.*, u.name AS user_name, u.email AS user_email 
+             FROM bookings b 
+             JOIN users u ON b.user_id = u.id 
+             WHERE b.guide_id = ?";
+
 if ($filter === 'all') {
-    $sql = "SELECT * FROM bookings WHERE guide_id = ? ORDER BY booking_date DESC";
+    $sql = $sql_base . " ORDER BY b.booking_date DESC";
     $stmt = $link->prepare($sql);
     $stmt->bind_param("i", $guide_id);
 } else {
-    $sql = "SELECT * FROM bookings WHERE guide_id = ? AND status = ? ORDER BY booking_date DESC";
+    $sql = $sql_base . " AND b.status = ? ORDER BY b.booking_date DESC";
     $stmt = $link->prepare($sql);
     $stmt->bind_param("is", $guide_id, $filter);
 }
@@ -51,159 +57,58 @@ $total_bookings = $result->num_rows;
             display: flex;
         }
 
-        /* Container that handles the sidebar offset */
         .page-wrapper {
             margin-left: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
             min-height: 100vh;
             display: flex;
-            justify-content: center; /* Centers the content horizontally */
+            justify-content: center; 
             padding: 40px 20px;
         }
 
-        /* The actual centered content box */
         .main-content {
             width: 100%;
-            max-width: 1100px; /* Prevents the table from becoming awkwardly wide */
+            max-width: 1100px; 
         }
 
-        h1 { 
-            font-size: 2.2rem; 
-            color: var(--text-dark); 
-            margin-bottom: 5px;
-        }
+        h1 { font-size: 2.2rem; color: var(--text-dark); margin-bottom: 5px; }
+        .subtitle { color: var(--text-muted); margin-bottom: 30px; }
 
-        .subtitle {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-
-        /* Filter Tabs */
-        .filter-container {
-            margin-bottom: 25px;
-            display: flex;
-            gap: 12px;
-        }
-
+        .filter-container { margin-bottom: 25px; display: flex; gap: 12px; }
         .filter-btn {
-            text-decoration: none;
-            padding: 10px 24px;
-            background: white;
-            border-radius: 30px;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid #e0e0e0;
-            transition: 0.3s;
+            text-decoration: none; padding: 10px 24px; background: white;
+            border-radius: 30px; color: var(--text-muted); font-size: 14px;
+            font-weight: 600; border: 1px solid #e0e0e0; transition: 0.3s;
         }
-
-        .filter-btn:hover {
-            border-color: var(--accent-green);
-            color: var(--accent-green);
-        }
-
+        .filter-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
         .filter-btn.active-filter {
-            background: var(--accent-green);
-            color: white;
-            border-color: var(--accent-green);
-            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+            background: var(--accent-green); color: white;
+            border-color: var(--accent-green); box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
         }
 
-        /* Summary Card */
         .stats-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
+            background: white; padding: 25px; border-radius: 15px;
+            display: flex; align-items: center; margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
+        .stat-count { font-size: 3rem; font-weight: 800; color: var(--accent-green); margin-right: 20px; line-height: 1; }
+        .stat-text { color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; font-weight: 700; }
 
-        .stat-count {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--accent-green);
-            margin-right: 20px;
-            line-height: 1;
-        }
+        .table-card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #fcfcfc; text-align: left; color: var(--text-muted); padding: 18px 25px; border-bottom: 2px solid #f0f0f0; font-size: 0.85rem; text-transform: uppercase; }
+        td { padding: 20px 25px; border-bottom: 1px solid #f0f0f0; color: var(--text-dark); vertical-align: middle; }
 
-        .stat-text {
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        /* Table Card */
-        .table-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            overflow: hidden; /* Keeps corners rounded */
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #fcfcfc;
-            text-align: left;
-            color: var(--text-muted);
-            padding: 18px 25px;
-            border-bottom: 2px solid #f0f0f0;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        td {
-            padding: 20px 25px;
-            border-bottom: 1px solid #f0f0f0;
-            color: var(--text-dark);
-            vertical-align: middle;
-        }
-
-        tr:last-child td { border-bottom: none; }
-
-        /* Status Badges */
-        .status-pill {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            display: inline-block;
-        }
-
+        .status-pill { padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .pending { background: #fff9db; color: #f08c00; }
         .confirmed { background: #ebfbee; color: #2b8a3e; }
         .cancelled { background: #fff5f5; color: #c92a2a; }
 
-        /* Action Buttons */
-        .action-link {
-            text-decoration: none;
-            font-size: 1.3rem;
-            margin-right: 15px;
-            transition: 0.2s;
-        }
-
+        .action-link { text-decoration: none; font-size: 1.3rem; margin-right: 15px; transition: 0.2s; }
         .action-link:hover { transform: scale(1.2); }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.2;
-        }
+        .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.2; }
     </style>
 </head>
 <body>
@@ -212,7 +117,6 @@ $total_bookings = $result->num_rows;
 
 <div class="page-wrapper">
     <div class="main-content">
-        
         <header>
             <h1>Trip Bookings</h1>
             <p class="subtitle">Review and manage your incoming tour requests.</p>
@@ -259,7 +163,7 @@ $total_bookings = $result->num_rows;
                                 </span>
                             </td>
                             <td>
-                                <?php if($row['status'] == 'pending'): ?>
+                                <?php if(strtolower($row['status']) == 'pending'): ?>
                                     <a href="process_booking.php?id=<?php echo $row['id']; ?>&action=confirm" class="action-link" style="color: #27ae60;" title="Confirm Trip">
                                         <i class="fa-solid fa-circle-check"></i>
                                     </a>
