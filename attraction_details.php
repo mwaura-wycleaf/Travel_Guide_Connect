@@ -8,6 +8,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
     exit;
 }
 
+// Using $link as defined in your db.php
 $attr_id = mysqli_real_escape_string($link, $_GET['id']);
 
 $sql_attr = "SELECT * FROM attractions WHERE id = '$attr_id'";
@@ -20,6 +21,7 @@ if (!$attraction) {
 }
 
 $target_county = mysqli_real_escape_string($link, $attraction['location']);
+// Filter by availability and county
 $sql_guides = "SELECT * FROM guides WHERE location = '$target_county' AND is_available = 1";
 $res_guides = mysqli_query($link, $sql_guides);
 $num_guides = mysqli_num_rows($res_guides);
@@ -44,14 +46,33 @@ $num_guides = mysqli_num_rows($res_guides);
         
         /* --- Attraction Hero --- */
         .attraction-hero {
-            display: flex; gap: 40px; background: #fff; padding: 30px;
+            display: flex; gap: 40px; background: #fff; padding: 35px;
             border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             margin-bottom: 50px; align-items: center;
         }
         .hero-img { width: 450px; height: 320px; border-radius: 20px; object-fit: cover; }
         .hero-text h1 { font-size: 2.5rem; color: #2c3e50; margin: 10px 0; }
         .county-tag { background: #e8f5e9; color: #27ae60; padding: 6px 15px; border-radius: 30px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; }
-        .description { line-height: 1.8; color: #666; margin-bottom: 20px; }
+        .description { line-height: 1.8; color: #666; margin-bottom: 25px; }
+
+        /* --- NEW: Map Button Style --- */
+        .btn-map {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2);
+        }
+        .btn-map:hover {
+            background: #219150;
+            transform: translateY(-2px);
+        }
 
         /* --- Guides Grid --- */
         .section-title { font-size: 1.8rem; color: #2c3e50; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
@@ -101,8 +122,15 @@ $num_guides = mysqli_num_rows($res_guides);
             <span class="county-tag"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($attraction['location']); ?> County</span>
             <h1><?php echo htmlspecialchars($attraction['name']); ?></h1>
             <p class="description"><?php echo nl2br(htmlspecialchars($attraction['description'])); ?></p>
-            <div style="font-size: 0.9rem; color: #2c3e50; font-weight: 600;">
-                <i class="fas fa-certificate" style="color: #27ae60;"></i> <?php echo $num_guides; ?> Experts found in this region
+            
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <a href="view_map.php?id=<?php echo $attr_id; ?>" class="btn-map">
+                    <i class="fas fa-map-location-dot"></i> View on Interactive Map
+                </a>
+
+                <div style="font-size: 0.9rem; color: #2c3e50; font-weight: 600;">
+                    <i class="fas fa-certificate" style="color: #27ae60;"></i> <?php echo $num_guides; ?> Experts in this region
+                </div>
             </div>
         </div>
     </div>
@@ -114,6 +142,7 @@ $num_guides = mysqli_num_rows($res_guides);
             <?php while($guide = mysqli_fetch_assoc($res_guides)): ?>
                 <div class="guide-card">
                     <?php 
+                        // Path check for guide images
                         $guide_img_path = "images/guides/" . $guide['profile_img'];
                         if (empty($guide['profile_img']) || !file_exists($guide_img_path)) {
                             $display_img = "https://ui-avatars.com/api/?name=" . urlencode($guide['name']) . "&background=random&color=fff&size=128";
@@ -125,19 +154,19 @@ $num_guides = mysqli_num_rows($res_guides);
                     <img src="<?php echo $display_img; ?>" class="guide-thumb" alt="Guide Profile">
                     
                     <div class="guide-name"><?php echo htmlspecialchars($guide['name']); ?></div>
-                    <span class="guide-spec"><?php echo htmlspecialchars($guide['specialization']); ?> Expert</span>
+                    <span class="guide-spec"><?php echo htmlspecialchars($guide['specialization'] ?? 'Tour'); ?> Expert</span>
                     
-                    <p class="guide-bio"><?php echo htmlspecialchars($guide['bio']); ?></p>
+                    <p class="guide-bio"><?php echo htmlspecialchars($guide['bio'] ?? 'Dedicated local guide with deep knowledge of the area.'); ?></p>
 
                     <div class="guide-meta">
-                        <span>⭐ <?php echo $guide['rating']; ?></span> | 
-                        <span><?php echo $guide['experience_years']; ?> Yrs Exp.</span> |
+                        <span>⭐ <?php echo $guide['rating'] ?? '5.0'; ?></span> | 
+                        <span><?php echo $guide['experience_years'] ?? '2'; ?> Yrs Exp.</span> |
                         <span style="color: #27ae60;">Ksh <?php echo number_format($guide['rate_per_day'] ?? 2500); ?></span>
                     </div>
                     
                     <a href="book.php?attr_id=<?php echo $attr_id; ?>&guide_id=<?php echo $guide['id']; ?>" class="btn-book">
-                    Book <?php echo htmlspecialchars(explode(' ', $guide['name'])[0]); ?>
-                   </a>
+                        Book <?php echo htmlspecialchars(explode(' ', $guide['name'])[0]); ?>
+                    </a>
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
