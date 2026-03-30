@@ -10,52 +10,104 @@ include "includes/header.php";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore Kenya | Travel Guide Connect</title>
-    <style>
-        body { background-color: #f4f7f6; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .text-center { text-align: center; }
-        .display-4 { font-size: 2.8rem; color: #2c3e50; font-weight: 700; margin-bottom: 10px; }
-        .lead { color: #7f8c8d; font-size: 1.1rem; margin-bottom: 30px; }
+<style>
+    body { background-color: #f4f7f6; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .text-center { text-align: center; }
+    .display-4 { font-size: 2.8rem; color: #2c3e50; font-weight: 700; margin-bottom: 10px; }
+    .lead { color: #7f8c8d; font-size: 1.1rem; margin-bottom: 30px; }
 
-        /* --- Search Bar --- */
-        .search-wrapper { max-width: 600px; margin: 0 auto 50px; position: relative; }
-        .search-input {
-            width: 100%; padding: 18px 30px 18px 55px; border-radius: 50px;
-            border: 2px solid #eee; outline: none; font-size: 1.1rem;
-            transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box;
-        }
-        .search-input:focus { border-color: #27ae60; box-shadow: 0 10px 30px rgba(39, 174, 96, 0.15); }
-        .search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: #bdc3c7; }
+    /* --- Search Bar --- */
+    .search-wrapper { max-width: 600px; margin: 0 auto 50px; position: relative; }
+    .search-input {
+        width: 100%; padding: 18px 30px 18px 55px; border-radius: 50px;
+        border: 2px solid #eee; outline: none; font-size: 1.1rem;
+        transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box;
+    }
+    .search-input:focus { border-color: #27ae60; box-shadow: 0 10px 30px rgba(39, 174, 96, 0.15); }
+    .search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: #bdc3c7; }
 
-        /* --- Grid & Cards --- */
-        .attractions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
-        
-        .attraction-card {
-            background: #fff; border-radius: 20px; overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.04); transition: 0.4s;
-            border: 1px solid #f0f0f0; display: flex; flex-direction: column;
-        }
-        .attraction-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .attraction-image { height: 220px; overflow: hidden; }
-        .attraction-image img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
+    /* --- Grid & Cards --- */
+    .attractions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+    
+    .attraction-card {
+        background: #fff; 
+        border-radius: 25px; 
+        overflow: hidden; 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04); 
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smooth easing for the lift */
+        border: 1px solid #f0f0f0; 
+        display: flex; 
+        flex-direction: column;
+        cursor: pointer;
+    }
 
-        .attraction-details { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
-        .location-tag { font-size: 0.85rem; color: #27ae60; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
-        .attraction-details h3 { margin: 0 0 12px 0; font-size: 1.5rem; color: #2c3e50; }
-        .attraction-details p { font-size: 0.95rem; color: #7f8c8d; height: 60px; overflow: hidden; margin-bottom: 25px; line-height: 1.6; }
+    /* --- HOVER EFFECTS: Lift and Green Glow --- */
+    .attraction-card:hover { 
+        transform: translateY(-12px); 
+        border-color: rgba(39, 174, 96, 0.3);
+        box-shadow: 0 20px 40px rgba(39, 174, 96, 0.15); /* The Green Glow */
+    }
+    
+    .attraction-image { position: relative; height: 220px; overflow: hidden; }
+    
+    /* --- IMAGE ZOOM ON HOVER --- */
+    .attraction-image img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        transition: transform 0.6s ease; /* Transition for the zoom */
+    }
 
-        /* --- THE BUTTON STYLING --- */
-        .btn-view {
-            margin-top: auto; background: #2c3e50; color: white;
-            text-align: center; padding: 14px; border-radius: 12px;
-            text-decoration: none; font-weight: 600; transition: all 0.3s ease;
-        }
-        .btn-view:hover { background: #27ae60; transform: scale(1.02); box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); }
-        .btn-view i { transition: transform 0.3s ease; margin-left: 8px; }
-        .btn-view:hover i { transform: translateX(5px); }
+    .attraction-card:hover .attraction-image img {
+        transform: scale(1.1); /* Zoom effect */
+    }
 
-        #loader { display: none; text-align: center; margin-bottom: 20px; color: #27ae60; font-size: 2rem; }
-    </style>
+    /* --- GREEN PRICE BADGE --- */
+    .price-badge {
+        position: absolute;
+        bottom: 15px; 
+        left: 15px;   
+        background: #27ae60; 
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        color: #ffffff;
+        font-size: 0.9rem;
+        z-index: 10;
+        transition: 0.3s;
+    }
+
+    .attraction-details { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+    
+    .location-tag { font-size: 0.9rem; color: #95a5a6; font-weight: 500; margin-bottom: 15px; display: flex; align-items: center; }
+    .location-tag i { color: #27ae60; margin-right: 8px; font-size: 1.1rem; }
+
+    .attraction-details h3 { margin: 0 0 8px 0; font-size: 1.6rem; color: #2c3e50; font-weight: 700; }
+    .attraction-details p { font-size: 0.95rem; color: #7f8c8d; height: 50px; overflow: hidden; margin-bottom: 20px; line-height: 1.6; }
+
+    /* --- VIEW DETAILS BUTTON --- */
+    .btn-view {
+        margin-top: auto; 
+        background: #f1f3f5; /* Initial light grey */
+        color: #2c3e50;      
+        text-align: center; 
+        padding: 12px; 
+        border-radius: 15px;
+        text-decoration: none; 
+        font-weight: 700; 
+        transition: 0.3s;
+    }
+
+    /* --- BUTTON INTERACTION: Turns green when the WHOLE card is hovered --- */
+    .attraction-card:hover .btn-view { 
+        background: #27ae60;
+        color: #ffffff;
+        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    #loader { display: none; text-align: center; margin-bottom: 20px; color: #27ae60; font-size: 2rem; }
+</style>
 </head>
 <body>
 

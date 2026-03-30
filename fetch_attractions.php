@@ -4,7 +4,7 @@ require_once "includes/db.php";
 // Capture the search string
 $search = isset($_GET['search']) ? mysqli_real_escape_string($link, $_GET['search']) : '';
 
-// PREFIX LOGIC: Only match if the name/location STARTS with the search term
+// Query logic
 if (!empty($search)) {
     $sql = "SELECT * FROM attractions 
             WHERE name LIKE '$search%' 
@@ -18,24 +18,29 @@ $result = mysqli_query($link, $sql);
 
 if (mysqli_num_rows($result) > 0) {
     while($row = mysqli_fetch_assoc($result)) {
+        $formatted_price = number_format($row['price'] ?? 0);
         ?>
         <div class="attraction-card">
             <div class="attraction-image">
+                <div class="price-badge">
+                    Entry: Ksh <?php echo $formatted_price; ?>
+                </div>
+                
                 <img src="images/<?php echo htmlspecialchars($row['img_url']); ?>" 
                      onerror="this.src='images/default_kenya.jpg';">
             </div>
             
             <div class="attraction-details">
+                <h3><?php echo htmlspecialchars($row['name']); ?></h3>
+                
                 <span class="location-tag">
                     <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($row['location']); ?> County
                 </span>
                 
-                <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                
                 <p><?php echo htmlspecialchars(substr($row['description'], 0, 100)) . '...'; ?></p>
                 
                 <a href="attraction_details.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                    Explore Local Guides <i class="fas fa-arrow-right"></i>
+                    View Details & Guides
                 </a>
             </div>
         </div>
