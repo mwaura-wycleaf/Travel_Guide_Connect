@@ -33,7 +33,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <?php endif; ?>
 
             <li class="sidebar-item">
-                <a href="reviews.php" class="sidebar-link <?php echo ($current_page == 'reviews.php') ? 'active' : ''; ?>">
+                <a href="manage_reviews.php" class="sidebar-link <?php echo ($current_page == 'reviews.php') ? 'active' : ''; ?>">
                     <i class="fas fa-star"></i> Reviews
                 </a>
             </li>
