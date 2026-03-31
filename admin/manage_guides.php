@@ -33,12 +33,12 @@ if (isset($_POST['add_guide'])) {
     }
 }
 
-// --- 2. HANDLE DELETE ---
+// --- 2. HANDLE DELETE (Added logic) ---
 if (isset($_GET['delete'])) {
     $id = mysqli_real_escape_string($link, $_GET['delete']);
-    // Optional: Delete the image file from server too
     mysqli_query($link, "DELETE FROM guides WHERE id='$id'");
     header("Location: manage_guides.php");
+    exit();
 }
 
 // --- 3. FETCH GUIDES ---
@@ -50,9 +50,24 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
 <head>
     <meta charset="UTF-8">
     <title>Manage Guides | Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
-        .main-content { margin-left: 260px; padding: 40px; }
+        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; margin: 0; }
+
+        /* --- LOGO VISIBILITY FIX --- */
+        header {
+            left: 250px !important; /* Move header to the right of the sidebar */
+            width: calc(100% - 250px) !important; /* Prevent width overflow */
+            box-sizing: border-box;
+        }
+
+        .main-content { 
+            margin-left: 250px; 
+            padding: 40px; 
+            padding-top: 120px; /* Space so content starts below the header */
+            transition: margin-left 0.3s ease; 
+        }
         
         .form-section {
             background: white; padding: 25px; border-radius: 15px; margin-bottom: 30px;
@@ -63,29 +78,36 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
         
         input, select, textarea {
             width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px;
+            box-sizing: border-box;
         }
 
         .btn-submit {
             background: #27ae60; color: white; border: none; padding: 12px 30px;
             border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: 600;
+            transition: 0.3s;
         }
+        .btn-submit:hover { background: #219150; }
 
         /* Guide List Styling */
         .guide-list { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #7f8c8d; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; vertical-align: middle; }
         
-        .guide-thumb { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-        .spec-label { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 0.8rem; }
+        .guide-thumb { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        .spec-label { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; }
         
         .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         
-        .delete-link { color: #e74c3c; text-decoration: none; }
+        .delete-link { color: #e74c3c; text-decoration: none; font-weight: bold; }
+        .delete-link:hover { color: #c0392b; }
 
-        @media (max-width: 768px) { .main-content { margin-left: 0; padding: 15px; } }
+        @media (max-width: 992px) { 
+            header { left: 0 !important; width: 100% !important; }
+            .main-content { margin-left: 0; padding: 100px 15px 15px 15px; } 
+        }
     </style>
 </head>
 <body>
@@ -95,7 +117,7 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
     <?php echo $message; ?>
 
     <div class="form-section">
-        <h3>Register a New Guide</h3>
+        <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-user-plus"></i> Register a New Guide</h3>
         <form action="" method="POST" enctype="multipart/form-data">
             <div class="input-grid">
                 <div>
@@ -134,7 +156,7 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
 
             <div style="margin-top: 15px;">
                 <label>Brief Bio</label>
-                <textarea name="bio" rows="3" required></textarea>
+                <textarea name="bio" rows="3" placeholder="Describe the guide's background..." required></textarea>
             </div>
 
             <div style="margin-top: 15px;">
@@ -142,12 +164,14 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
                 <input type="file" name="image" accept="image/*" required>
             </div>
 
-            <button type="submit" name="add_guide" class="btn-submit">Add Guide to Platform</button>
+            <button type="submit" name="add_guide" class="btn-submit">
+                <i class="fas fa-check-circle"></i> Add Guide to Platform
+            </button>
         </form>
     </div>
 
     <div class="guide-list">
-        <h3>Active Professional Guides</h3>
+        <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-users"></i> Active Professional Guides</h3>
         <table>
             <thead>
                 <tr>
@@ -161,13 +185,19 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
             <tbody>
                 <?php while($row = mysqli_fetch_assoc($result)): ?>
                 <tr>
-                    <td><img src="../images/<?php echo $row['profile_img']; ?>" class="guide-thumb" onerror="this.src='../images/default_guide.jpg';"></td>
-                    <td><strong><?php echo htmlspecialchars($row['name']); ?></strong><br><small><?php echo $row['email']; ?></small></td>
+                    <td>
+                        <img src="../images/<?php echo $row['profile_img']; ?>" class="guide-thumb" 
+                             onerror="this.src='../images/default_guide.jpg';">
+                    </td>
+                    <td>
+                        <strong><?php echo htmlspecialchars($row['name']); ?></strong><br>
+                        <small style="color: #7f8c8d;"><?php echo htmlspecialchars($row['email']); ?></small>
+                    </td>
                     <td><span class="spec-label"><?php echo $row['specialization']; ?></span></td>
                     <td><?php echo htmlspecialchars($row['location']); ?></td>
                     <td>
                         <a href="manage_guides.php?delete=<?php echo $row['id']; ?>" 
-                           class="delete-link" onclick="return confirm('Remove this guide?');">
+                           class="delete-link" onclick="return confirm('Permanently remove this guide?');">
                            <i class="fas fa-trash-alt"></i> Delete
                         </a>
                     </td>

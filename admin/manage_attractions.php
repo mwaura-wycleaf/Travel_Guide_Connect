@@ -47,9 +47,24 @@ $result = mysqli_query($link, "SELECT * FROM attractions ORDER BY id DESC");
 <head>
     <meta charset="UTF-8">
     <title>Manage Attractions | Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
-        .main-content { margin-left: 260px; padding: 40px; }
+        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; margin: 0; }
+
+        /* --- LOGO VISIBILITY FIX --- */
+        header {
+            left: 250px !important; /* Push header content to the right of the sidebar */
+            width: calc(100% - 250px) !important; /* Prevent header from overflowing right */
+            box-sizing: border-box;
+        }
+
+        .main-content { 
+            margin-left: 250px; 
+            padding: 40px; 
+            padding-top: 120px; /* Space for the header height */
+            transition: margin-left 0.3s ease;
+        }
         
         .form-container {
             background: white; padding: 25px; border-radius: 15px; margin-bottom: 30px;
@@ -60,33 +75,37 @@ $result = mysqli_query($link, "SELECT * FROM attractions ORDER BY id DESC");
         
         input, textarea, select {
             width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px;
-            border: 1px solid #ddd; font-family: inherit;
+            border: 1px solid #ddd; font-family: inherit; box-sizing: border-box;
         }
 
         .checkbox-group { display: flex; gap: 15px; margin-top: 15px; align-items: center; }
-        .checkbox-group label { font-size: 0.85rem; }
+        .checkbox-group label { font-size: 0.85rem; color: #555; }
 
         .btn-add {
             background: #27ae60; color: white; border: none; padding: 12px 25px;
             border-radius: 8px; cursor: pointer; margin-top: 15px; font-weight: 600;
+            transition: 0.3s;
         }
+        .btn-add:hover { background: #219150; }
 
         /* Table Styles */
         .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; }
-        td { padding: 15px; border-bottom: 1px solid #eee; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #7f8c8d; font-size: 0.9rem; }
+        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
         
-        .img-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .img-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; }
         
-        .alert { padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        .btn-del { color: #e74c3c; text-decoration: none; font-weight: bold; }
+        .btn-del { color: #e74c3c; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        .btn-del:hover { color: #c0392b; }
 
-        @media (max-width: 768px) {
-            .main-content { margin-left: 0; padding: 15px; }
+        @media (max-width: 992px) {
+            header { left: 0 !important; width: 100% !important; }
+            .main-content { margin-left: 0; padding: 100px 15px 15px 15px; }
             .form-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -94,11 +113,14 @@ $result = mysqli_query($link, "SELECT * FROM attractions ORDER BY id DESC");
 <body>
 
 <div class="main-content">
-    <h1>Manage Destinations</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Manage Destinations</h1>
+    </div>
+
     <?php echo $message; ?>
 
     <div class="form-container">
-        <h3>Add New Attraction</h3>
+        <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-map-marker-alt"></i> Add New Attraction</h3>
         <form action="manage_attractions.php" method="POST" enctype="multipart/form-data">
             <div class="form-grid">
                 <div>
@@ -128,12 +150,14 @@ $result = mysqli_query($link, "SELECT * FROM attractions ORDER BY id DESC");
                 </div>
             </div>
 
-            <button type="submit" name="add_attraction" class="btn-add">Save Destination</button>
+            <button type="submit" name="add_attraction" class="btn-add">
+                <i class="fas fa-save"></i> Save Destination
+            </button>
         </form>
     </div>
 
     <div class="table-container">
-        <h3>Current Destinations</h3>
+        <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-list"></i> Current Destinations</h3>
         <table>
             <thead>
                 <tr>
@@ -144,19 +168,25 @@ $result = mysqli_query($link, "SELECT * FROM attractions ORDER BY id DESC");
                 </tr>
             </thead>
             <tbody>
-                <?php while($row = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <td><img src="../images/<?php echo $row['img_url']; ?>" class="img-preview"></td>
-                    <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
-                    <td><?php echo htmlspecialchars($row['location']); ?></td>
-                    <td>
-                        <a href="manage_attractions.php?delete=<?php echo $row['id']; ?>" 
-                           class="btn-del" onclick="return confirm('Remove this destination?');">
-                           <i class="fas fa-trash"></i> Delete
-                        </a>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
+                <?php if(mysqli_num_rows($result) > 0): ?>
+                    <?php while($row = mysqli_fetch_assoc($result)): ?>
+                    <tr>
+                        <td><img src="../images/<?php echo $row['img_url']; ?>" class="img-preview"></td>
+                        <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
+                        <td><?php echo htmlspecialchars($row['location']); ?></td>
+                        <td>
+                            <a href="manage_attractions.php?delete=<?php echo $row['id']; ?>" 
+                               class="btn-del" onclick="return confirm('Permanently remove this destination?');">
+                               <i class="fas fa-trash-alt"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #999; padding: 30px;">No destinations found. Start adding some!</td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
