@@ -1,42 +1,50 @@
 <?php
+// 1. Always start the session first
 session_start();
 require_once "../includes/db.php";
 
-// 1. Security Check: Only logged-in guides can process bookings
-if (!isset($_SESSION['guide_id'])) {
-    header("Location: guide_login.php");
+// 2. Updated Security Check: Match the new Unified Login variables
+if(!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'guide'){
+    // Redirect to the central login if they aren't a logged-in guide
+    header("Location: ../auth/login.php");
     exit();
 }
 
-// 2. Check if the ID and Action are passed in the URL
+// 3. Check if the ID and Action are passed in the URL
 if (isset($_GET['id']) && isset($_GET['action'])) {
-    $booking_id = mysqli_real_escape_string($link, $_GET['id']);
+    $booking_id = $_GET['id'];
     $action = $_GET['action'];
-    $guide_id = $_SESSION['guide_id'];
+    $guide_id = $_SESSION['id']; // Using the unified session ID
 
-    // Determine the new status based on the button clicked
+    // Determine the new status based on the action parameter
     if ($action === 'confirm') {
-        $new_status = 'Confirmed';
+        $new_status = 'confirmed';
     } elseif ($action === 'cancel') {
-        $new_status = 'Cancelled';
+        $new_status = 'cancelled';
     } else {
-        // If someone messes with the URL manually
+        // Handle invalid manual URL tampering
         header("Location: manage_bookings.php?error=invalid_action");
         exit();
     }
 
-    // 3. Update the database
-    // We include guide_id in the WHERE clause so a guide can't accidentally cancel someone else's booking
-    $sql = "UPDATE bookings SET status = '$new_status' WHERE id = '$booking_id' AND guide_id = '$guide_id'";
+    // 4. Update the database using Prepared Statements
+    // We include guide_id in the WHERE clause as a security layer
+    $stmt = $link->prepare("UPDATE bookings SET status = ? WHERE id = ? AND guide_id = ?");
+    $stmt->bind_param("sii", $new_status, $booking_id, $guide_id);
 
-    if (mysqli_query($link, $sql)) {
+    if ($stmt->execute()) {
         // Success! Redirect back with a success message
-        header("Location: manage_bookings.php?msg=Booking " . $new_status);
+        // Using urlencode for the message to handle spaces safely in the URL
+        header("Location: manage_bookings.php?msg=" . urlencode("Booking " . ucfirst($new_status)));
     } else {
-        echo "Error updating record: " . mysqli_error($link);
+        // Technical error handling
+        echo "Error updating record: " . $stmt->error;
     }
+    $stmt->close();
+    
 } else {
-    // If IDs are missing
+    // If parameters are missing, just go back to the list
     header("Location: manage_bookings.php");
+    exit();
 }
 ?>

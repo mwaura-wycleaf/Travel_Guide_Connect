@@ -1,16 +1,18 @@
 <?php
+// 1. Always start the session first
 session_start();
 include("../includes/db.php"); 
 
-if(!isset($_SESSION['guide_id'])){
-    header("Location: guide_login.php");
+// 2. Updated Security Check: Match the new Unified Login variables
+if(!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'guide'){
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$guide_id = $_SESSION['guide_id'];
+$guide_id = $_SESSION['id']; // Using the unified session ID
 $message = "";
 
-// --- 1. MIGRATIONS & SETUP ---
+// --- 1. DATABASE SETUP (Ensures columns exist) ---
 $check_cols = mysqli_query($link, "SHOW COLUMNS FROM guides");
 $existing_cols = [];
 while($r = mysqli_fetch_assoc($check_cols)) { $existing_cols[] = $r['Field']; }
@@ -31,31 +33,41 @@ if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
 
 // --- 2. HANDLE PROFILE UPDATE ---
 if (isset($_POST['update_profile'])) {
-    $name = mysqli_real_escape_string($link, $_POST['name']);
-    $phone = mysqli_real_escape_string($link, $_POST['phone']);
-    $location = mysqli_real_escape_string($link, $_POST['location']);
-    $bio = mysqli_real_escape_string($link, $_POST['bio']);
+    $name = $_POST['name'];
+    $phone = $_POST['phone'];
+    $location = $_POST['location'];
+    $bio = $_POST['bio'];
     
+    $pic_name = "";
     if (!empty($_FILES['image']['name'])) {
         $pic_name = time() . "_" . basename($_FILES['image']['name']);
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $target_dir . $pic_name)) {
-            $sql_pic = ", profile_pic='$pic_name'";
-        }
-    } else {
-        $sql_pic = ""; 
+        move_uploaded_file($_FILES['image']['tmp_name'], $target_dir . $pic_name);
     }
 
-    $update_sql = "UPDATE guides SET name='$name', phone='$phone', location='$location', bio='$bio' $sql_pic WHERE id='$guide_id'";
-    
-    if (mysqli_query($link, $update_sql)) {
-        $_SESSION['guide_name'] = $name; 
-        $message = "<div class='alert success'><i class='fas fa-check-circle'></i> Profile updated!</div>";
+    // Use Prepared Statement for security and handling special characters in Bio
+    if ($pic_name != "") {
+        $stmt = $link->prepare("UPDATE guides SET name=?, phone=?, location=?, bio=?, profile_pic=? WHERE id=?");
+        $stmt->bind_param("sssssi", $name, $phone, $location, $bio, $pic_name, $guide_id);
+    } else {
+        $stmt = $link->prepare("UPDATE guides SET name=?, phone=?, location=?, bio=? WHERE id=?");
+        $stmt->bind_param("ssssi", $name, $phone, $location, $bio, $guide_id);
     }
+    
+    if ($stmt->execute()) {
+        $_SESSION['name'] = $name; // Update session name so sidebar updates immediately
+        $message = "<div class='alert success'><i class='fas fa-check-circle'></i> Profile updated successfully!</div>";
+    } else {
+        $message = "<div class='alert error'>Update failed. Please try again.</div>";
+    }
+    $stmt->close();
 }
 
 // --- 3. FETCH DATA TO PRE-FILL FORM ---
-$res = mysqli_query($link, "SELECT * FROM guides WHERE id = '$guide_id'");
-$guide_data = mysqli_fetch_assoc($res);
+$stmt = $link->prepare("SELECT * FROM guides WHERE id = ?");
+$stmt->bind_param("i", $guide_id);
+$stmt->execute();
+$res = $stmt->get_result();
+$guide_data = $res->fetch_assoc();
 $current_pic = (!empty($guide_data['profile_pic'])) ? $guide_data['profile_pic'] : 'default.png';
 ?>
 
@@ -63,23 +75,55 @@ $current_pic = (!empty($guide_data['profile_pic'])) ? $guide_data['profile_pic']
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Profile | T-Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | Travel Guide Connect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
-        .main-content { margin-left: 250px; padding: 40px; width: calc(100% - 250px); }
-        .profile-card { background: white; padding: 35px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); max-width: 600px; margin: 0 auto; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600; }
-        .form-group input, .form-group textarea { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none;
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
+        
+        .main-content { 
+            margin-left: 250px; 
+            padding: 40px; 
+            width: calc(100% - 250px); 
+            min-height: 100vh;
         }
-        .form-group input:focus { border-color: #27ae60; }
-        .profile-preview { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #27ae60; background: #eee; }
-        .btn-save { background: #27ae60; color: white; border: none; padding: 14px 40px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        .btn-save:hover { background: #1e8449; transform: translateY(-2px); }
-        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-        .success { background: #d4edda; color: #155724; }
+
+        .profile-card { 
+            background: white; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            max-width: 700px; 
+            margin: 0 auto; 
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group textarea { 
+            width: 100%; padding: 14px; border: 1.5px solid #eef0f2; border-radius: 12px; outline: none; transition: 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color: #27ae60; background: #fff; }
+        
+        .profile-image-section { text-align: center; margin-bottom: 30px; }
+        .profile-preview { 
+            width: 130px; height: 130px; border-radius: 50%; object-fit: cover; 
+            margin-bottom: 15px; border: 4px solid #27ae60; padding: 3px; background: white;
+        }
+
+        .btn-save { 
+            background: #2c3e50; color: white; border: none; padding: 16px; 
+            border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; 
+        }
+        .btn-save:hover { background: #27ae60; transform: translateY(-2px); }
+
+        .alert { padding: 15px; border-radius: 12px; margin-bottom: 25px; text-align: center; font-weight: 500; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        @media (max-width: 992px) {
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -92,10 +136,10 @@ $current_pic = (!empty($guide_data['profile_pic'])) ? $guide_data['profile_pic']
     <div class="profile-card">
         <?php echo $message; ?>
         <form method="POST" enctype="multipart/form-data">
-            <div class="form-group" style="text-align: center;">
-                <img src="../images/guides/<?php echo $current_pic; ?>" class="profile-preview">
+            <div class="profile-image-section">
+                <img src="../images/guides/<?php echo htmlspecialchars($current_pic); ?>" class="profile-preview">
                 <br>
-                <input type="file" name="image" accept="image/*" style="border: none; width: auto;">
+                <input type="file" name="image" accept="image/*" style="font-size: 0.8rem; color: #7f8c8d;">
             </div>
 
             <div class="form-group">
@@ -105,20 +149,20 @@ $current_pic = (!empty($guide_data['profile_pic'])) ? $guide_data['profile_pic']
 
             <div class="form-group">
                 <label>Phone Number</label>
-                <input type="text" name="phone" value="<?php echo htmlspecialchars($guide_data['phone']); ?>">
+                <input type="text" name="phone" value="<?php echo htmlspecialchars($guide_data['phone'] ?? ''); ?>" placeholder="e.g. +254 700 000 000">
             </div>
 
             <div class="form-group">
                 <label>Current Location</label>
-                <input type="text" name="location" value="<?php echo htmlspecialchars($guide_data['location']); ?>">
+                <input type="text" name="location" value="<?php echo htmlspecialchars($guide_data['location'] ?? ''); ?>" placeholder="e.g. Nyeri, Kenya">
             </div>
 
             <div class="form-group">
                 <label>Professional Bio</label>
-                <textarea name="bio" rows="4"><?php echo htmlspecialchars($guide_data['bio']); ?></textarea>
+                <textarea name="bio" rows="5" placeholder="Tell travelers about your experience..."><?php echo htmlspecialchars($guide_data['bio'] ?? ''); ?></textarea>
             </div>
 
-            <button type="submit" name="update_profile" class="btn-save">Save Changes</button>
+            <button type="submit" name="update_profile" class="btn-save">Save Profile Changes</button>
         </form>
     </div>
 </div>

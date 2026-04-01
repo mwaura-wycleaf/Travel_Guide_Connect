@@ -2,13 +2,15 @@
 session_start();
 require_once "../includes/db.php"; 
 
-// 1. SECURITY: Check if guide is logged in
-if(!isset($_SESSION['guide_id'])){
-    header("Location: guide_login.php");
+// 1. UPDATED SECURITY: Match the new Unified Login variables
+if(!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'guide'){
+    // Redirect to the central login if they aren't a logged-in guide
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$guide_id = $_SESSION['guide_id']; 
+// Use the session ID from the unified login
+$guide_id = $_SESSION['id']; 
 
 // 2. FILTER LOGIC
 $filter = isset($_GET['status']) ? $_GET['status'] : 'all';
@@ -52,7 +54,7 @@ $total_bookings = $result->num_rows;
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
             display: flex;
         }
@@ -104,11 +106,15 @@ $total_bookings = $result->num_rows;
         .confirmed { background: #ebfbee; color: #2b8a3e; }
         .cancelled { background: #fff5f5; color: #c92a2a; }
 
-        .action-link { text-decoration: none; font-size: 1.3rem; margin-right: 15px; transition: 0.2s; }
+        .action-link { text-decoration: none; font-size: 1.3rem; margin-right: 15px; transition: 0.2s; display: inline-block; }
         .action-link:hover { transform: scale(1.2); }
 
         .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
         .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.2; }
+
+        @media (max-width: 992px) {
+            .page-wrapper { margin-left: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>

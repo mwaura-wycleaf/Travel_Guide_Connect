@@ -2,25 +2,34 @@
 // 1. Always start the session first
 session_start();
 
-// 2. Correct the paths to your includes (Go up one level with ../)
+// 2. Database Connection
 include("../includes/db.php"); 
 
-// 3. Protection logic
-if(!isset($_SESSION['guide_id'])){
-    header("Location: login_guide.php");
+// 3. Updated Security Check: Match the new Unified Login variables
+if(!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'guide'){
+    // Redirect to the central login if they aren't a logged-in guide
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$guide_id = $_SESSION['guide_id'];
+// Use the session ID from the unified login
+$guide_id = $_SESSION['id'];
 
 // 4. Fetch Reviews for this specific guide
-// Note: This assumes you have a 'reviews' table with 'guide_id' and 'rating' columns
-$review_query = "SELECT * FROM reviews WHERE guide_id = '$guide_id' ORDER BY created_at DESC";
-$reviews_result = mysqli_query($link, $review_query);
+// Assumes 'reviews' table exists with columns: guide_id, user_id, rating, comment, created_at
+$review_query = "SELECT * FROM reviews WHERE guide_id = ? ORDER BY created_at DESC";
+$stmt = $link->prepare($review_query);
+$stmt->bind_param("i", $guide_id);
+$stmt->execute();
+$reviews_result = $stmt->get_result();
 
 // 5. Calculate Average Rating
-$avg_query = mysqli_query($link, "SELECT AVG(rating) as avg_rating FROM reviews WHERE guide_id = '$guide_id'");
-$avg_data = mysqli_fetch_assoc($avg_query);
+$avg_stmt = $link->prepare("SELECT AVG(rating) as avg_rating FROM reviews WHERE guide_id = ?");
+$avg_stmt->bind_param("i", $guide_id);
+$avg_stmt->execute();
+$avg_result = $avg_stmt->get_result();
+$avg_data = $avg_result->fetch_assoc();
+
 $rating = ($avg_data['avg_rating']) ? number_format($avg_data['avg_rating'], 1) : "0.0";
 ?>
 
@@ -28,44 +37,27 @@ $rating = ($avg_data['avg_rating']) ? number_format($avg_data['avg_rating'], 1) 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reviews | Travel Guide Connect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
         
-        /* Sidebar Styles */
-        .sidebar { 
-            width: 250px; 
-            height: 100vh; 
-            background: #2c3e50; 
-            color: white; 
-            padding: 25px; 
-            position: fixed; 
-            left: 0;
-            top: 0;
-        }
-        .sidebar h2 { font-size: 1.4rem; margin-bottom: 20px; color: #27ae60; text-align: center; }
-        .sidebar a { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 8px; margin-bottom: 10px; transition: 0.3s; }
-        .sidebar a:hover { background: rgba(255,255,255,0.1); color: white; }
-        .sidebar a.active { background: #34495e; color: #27ae60; font-weight: bold; }
-        
-        /* Main Content Centering */
+        /* Main Content Styling */
         .main-content { 
             margin-left: 250px; 
             padding: 40px; 
             width: calc(100% - 250px); 
             display: flex;
             flex-direction: column;
-            align-items: center; /* Horizontal centering */
+            align-items: center; 
             min-height: 100vh;
         }
 
-        .content-container {
-            width: 100%;
-            max-width: 800px; /* Limits width for better readability */
-        }
+        .content-container { width: 100%; max-width: 800px; }
         
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; font-size: 2rem; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; font-size: 2.2rem; }
 
         /* Rating Header Card */
         .rating-header {
@@ -74,7 +66,7 @@ $rating = ($avg_data['avg_rating']) ? number_format($avg_data['avg_rating'], 1) 
             border-radius: 20px;
             display: flex;
             align-items: center;
-            justify-content: center; /* Center items inside the card */
+            justify-content: center;
             gap: 40px;
             margin-bottom: 40px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
@@ -125,23 +117,15 @@ $rating = ($avg_data['avg_rating']) ? number_format($avg_data['avg_rating'], 1) 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
             .rating-header { flex-direction: column; gap: 15px; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>Guide Panel</h2>
-    <hr style="opacity: 0.1; margin-bottom: 20px;">
-    <a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a>
-    <a href="manage_bookings.php"><i class="fas fa-suitcase"></i> My Trips</a>
-    <a href="availability.php"><i class="fas fa-calendar-check"></i> Availability</a>
-    <a href="reviews.php" class="active"><i class="fas fa-star"></i> Reviews</a>
-    <a href="edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a>
-    <a href="includes/guide_logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-</div>
+<?php include("../includes/sidebar.php"); ?>
 
 <div class="main-content">
     <div class="content-container">
@@ -163,8 +147,8 @@ $rating = ($avg_data['avg_rating']) ? number_format($avg_data['avg_rating'], 1) 
         </div>
 
         <div class="reviews-list">
-            <?php if(mysqli_num_rows($reviews_result) > 0): ?>
-                <?php while($row = mysqli_fetch_assoc($reviews_result)): ?>
+            <?php if($reviews_result->num_rows > 0): ?>
+                <?php while($row = $reviews_result->fetch_assoc()): ?>
                     <div class="review-card">
                         <div class="review-meta">
                             <span><i class="fas fa-user-circle"></i> Traveler #<?php echo $row['user_id']; ?></span>

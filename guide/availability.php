@@ -5,19 +5,22 @@ session_start();
 // 2. Database Connection
 include("../includes/db.php"); 
 
-// 3. Security Check
-if(!isset($_SESSION['guide_id'])){
-    header("Location: guide_login.php");
+// 3. Updated Security Check: Match the new Unified Login variables
+if(!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'guide'){
+    // Redirect to the central login if they aren't a logged-in guide
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$guide_id = $_SESSION['guide_id'];
+// Use the session ID from the unified login
+$guide_id = $_SESSION['id'];
 $message = "";
 
 // Handle status update
 if (isset($_POST['update_status'])) {
     $new_status = $_POST['status']; // '1' or '0'
     
+    // We update the 'is_available' column in the guides table
     $stmt = $link->prepare("UPDATE guides SET is_available = ? WHERE id = ?");
     $stmt->bind_param("si", $new_status, $guide_id);
     
@@ -32,7 +35,7 @@ if (isset($_POST['update_status'])) {
 // Fetch current status
 $res = mysqli_query($link, "SELECT is_available FROM guides WHERE id = '$guide_id'");
 $guide_data = mysqli_fetch_assoc($res);
-$current_status = $guide_data['is_available'];
+$current_status = isset($guide_data['is_available']) ? $guide_data['is_available'] : 0;
 ?>
 
 <!DOCTYPE html>
@@ -43,8 +46,8 @@ $current_status = $guide_data['is_available'];
     <title>My Availability | Travel Guide Connect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; } /* Universal sizing fix */
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
         
         /* Main Content Styling */
         .main-content { 
@@ -69,11 +72,15 @@ $current_status = $guide_data['is_available'];
         input[type="radio"] { display: none; }
         input[value="1"]:checked + .radio-label { border-color: #27ae60; color: #27ae60; background: rgba(39, 174, 96, 0.05); }
         input[value="0"]:checked + .radio-label { border-color: #e74c3c; color: #e74c3c; background: rgba(231, 76, 60, 0.05); }
-        .btn-save { margin-top: 40px; background: #2c3e50; color: white; border: none; padding: 16px 60px; border-radius: 35px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save { margin-top: 40px; background: #2c3e50; color: white; border: none; padding: 16px 60px; border-radius: 35px; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; }
         .btn-save:hover { background: #27ae60; transform: translateY(-3px); }
         .alert { padding: 15px; border-radius: 12px; margin-bottom: 25px; width: 100%; }
         .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        @media (max-width: 992px) {
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -88,8 +95,8 @@ $current_status = $guide_data['is_available'];
 
         <div class="status-card">
             <h2 style="color: #2c3e50; margin-bottom: 12px; display: flex; align-items: center; justify-content: center;">
-                <span class="status-indicator <?php echo $current_status ? 'online' : 'offline'; ?>"></span>
-                <?php echo $current_status ? 'Currently Online' : 'Currently Offline'; ?>
+                <span class="status-indicator <?php echo $current_status == 1 ? 'online' : 'offline'; ?>"></span>
+                <?php echo $current_status == 1 ? 'Currently Available' : 'Currently Busy'; ?>
             </h2>
             <p style="color: #7f8c8d;">Toggle your status to control your visibility to travelers.</p>
 
