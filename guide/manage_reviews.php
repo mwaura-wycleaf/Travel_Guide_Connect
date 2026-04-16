@@ -46,19 +46,9 @@ include("../includes/sidebar.php");
         body { background: #f8fafb; font-family: 'Poppins', sans-serif; margin: 0; }
 
         /* --- HEADER & LOGO ALIGNMENT (FAR LEFT) --- */
-        header {
-            position: fixed;
-            top: 0;
-            left: 260px !important; 
-            width: calc(100% - 260px) !important;
-            height: 70px;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start; /* Keeps logo at far left */
-            padding: 0 25px; 
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          header {
+            left: 250px !important; /* Push header content to the right of the sidebar */
+            width: calc(100% - 250px) !important; /* Prevent header from overflowing right */
             box-sizing: border-box;
         }
 

@@ -93,7 +93,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <title>Sign In | Travel Guide Connect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Poppins', sans-serif; overflow: hidden; }
+        body, html {  margin: 0; padding: 0; height: 100%; font-family: 'Poppins', sans-serif; overflow: hidden; }
         .page-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; height: 100vh; background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../images/tconnect.background.jpg') no-repeat center center/cover; }
         .login-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); width: 100%; max-width: 400px; text-align: center; color: white; }
         .brand h2 { font-size: 2rem; margin-bottom: 5px; text-transform: uppercase; }
