@@ -139,9 +139,9 @@ TRAVEL_GUIDE_CONNECT/
 
 | Role | Username / Email | Password |
 | :--- | :--- | :--- |
-| **Administrator** | admin@travel.com | admin123 |
-| **Professional Guide** | guide@travel.com | guide123 |
-| **Traveler** | traveler@travel.com | user123 |
+| **Administrator** | admin@tconnect.co.ke | password |
+| **Professional Guide** | fatuma.k@example.com | 123456 |
+| **Traveler** | eunice@gmail.com | 123456 |
 
 -----
 
