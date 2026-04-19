@@ -145,11 +145,21 @@ TRAVEL_GUIDE_CONNECT/
 
 -----
 
-## 👨‍💻 Project Development Team
+👨‍💻 Project Development Team
+Institution: Dedan Kimathi University of Technology (DeKUT)
 
-**Institution:** Dedan Kimathi University of Technology (DeKUT)  
-**Course:** Bachelor of Science in Computer Science
+Course: Bachelor of Science in Computer Science
 
- 
+mwaura-wycleaf (Lead Developer): * Full-stack logic for the Traveler/User module.
 
-*Developed in 2026. This project is submitted as an academic requirement for the Computer Science department at DeKUT.*
+Database Architecture & Relational Schema Design.
+
+TracyNdiritu: * Administrative Panel development and system oversight features.
+
+Management of attractions, bookings, and user metrics.
+
+christon-mwash: * Guide Interface development.
+
+Guide profile management, booking processing, and availability logic.
+
+Developed in 2026. This project is submitted as an academic requirement for the Computer Science department at DeKUT.
