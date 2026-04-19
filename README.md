@@ -1,8 +1,4 @@
-Adding a direct cloning link is a great touch for your examiner, as it shows you are using industry-standard version control. Since your GitHub handle is **mwaura-wycleaf** and the repository name is **Travel\_Guide\_Connect**, I have added the GitHub section to the bottom of the installation guide.
 
-Here is the final, complete `README.md` for your project:
-
------
 
 # TRAVEL GUIDE CONNECT – SYSTEM MANUAL
 
@@ -150,7 +146,7 @@ TRAVEL_GUIDE_CONNECT/
 **Institution:** Dedan Kimathi University of Technology (DeKUT)  
 **Course:** Bachelor of Science in Computer Science
 
-  * **[mwaura-wycleaf](https://www.google.com/search?q=https://github.com/mwaura-wycleaf) (Lead Developer):**
+  * **[mwaura-wycleaf](https://github.com/mwaura-wycleaf) (Lead Developer):**
       * Developed the full-stack logic for the **Traveler/User** module.
       * Designed the **Database Architecture** and Relational Schema.
   * **[TracyNdiritu](https://www.google.com/search?q=https://github.com/TracyNdiritu):**
