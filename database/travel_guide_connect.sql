@@ -338,7 +338,21 @@ INSERT INTO `guides` (`id`, `name`, `email`, `password`, `phone`, `location`, `s
 (109, 'Wanjiku Nyawira', 'wanjiku.n@example.com', '$2y$10$Hlzb7QZ/cLYVxqd2VXIptu3D3NhhgHgCdiWCvdF7mWoo8Y2V67hCe', '0712800002', 'Nyeri', 'History & Scouting', 7, 'Specialist in Baden-Powell history and Nyeri town heritage tours.', 'guide_default.jpg', 4.80, '2026-03-29 19:22:52', 1, 'default.png', 2500),
 (110, 'Kamau Ngũgĩ', 'kamau.ngugi@example.com', '$2y$10$Hlzb7QZ/cLYVxqd2VXIptu3D3NhhgHgCdiWCvdF7mWoo8Y2V67hCe', '0712800003', 'Nyeri', 'Forest Trekking', 9, 'Expert in Aberdare forest trails, bird watching, and Zaina falls.', 'guide_default.jpg', 4.90, '2026-03-29 19:22:52', 1, 'default.png', 2500),
 (111, 'Muthoni Waithaka', 'muthoni.w@example.com', '$2y$10$Hlzb7QZ/cLYVxqd2VXIptu3D3NhhgHgCdiWCvdF7mWoo8Y2V67hCe', '0712800004', 'Nyeri', 'Agro-tourism', 5, 'Specialist in Nyeri coffee tours and tea farm excursions.', 'guide_default.jpg', 4.70, '2026-03-29 19:22:52', 1, 'default.png', 2500),
-(112, 'Gĩtonga Mũramĩ', 'gitonga.m@example.com', '$2y$10$Hlzb7QZ/cLYVxqd2VXIptu3D3NhhgHgCdiWCvdF7mWoo8Y2V67hCe', '0712800005', 'Nyeri', 'Photography', 6, 'Nature photographer and guide for scenic viewpoints in Nyeri.', 'guide_default.jpg', 4.60, '2026-03-29 19:22:52', 1, 'default.png', 2500);
+(112, 'Gĩtonga Mũramĩ', 'gitonga.m@example.com', '$2y$10$Hlzb7QZ/cLYVxqd2VXIptu3D3NhhgHgCdiWCvdF7mWoo8Y2V67hCe', '0712800005', 'Nyeri', 'Photography', 6, 'Nature photographer and guide for scenic viewpoints in Nyeri.', 'guide_default.jpg', 4.60, '2026-03-29 19:22:52', 1, 'default.png', 2500)
+(115,
+    'Kipchumba Bett', 
+    'kipchumba.b@example.com', 
+    '$2y$10$Hlzb7QZ/cLYVxqd2VXIptu3D3NhhgHgCdiWCvdF7mWoo8Y2V67hCe',
+    '0712345678', 
+    'Elgeyo-Marakwet', 
+    'High-Altitude Hiking & Athletics Tourism', 
+    7, 
+    'Born and raised in the Home of Champions, I specialize in guiding tourists through the scenic Kerio Valley and organizing high-altitude hiking expeditions in the Iten highlands.', 
+    'guide_default.jpg', 
+    4.8, '2026-04-19 17:49:20' ,
+    1, 
+    'default.jpg', 
+    3500);
 
 -- --------------------------------------------------------
 
