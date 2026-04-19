@@ -1,12 +1,27 @@
 <?php
+// 1. CRITICAL: Database and Logic must be at the absolute top
 include("includes/admin_auth.php"); 
 include("../includes/db.php"); 
-include("../includes/header.php");
-include("../includes/sidebar.php");
+
+// --- 2. HANDLE DELETE (Moved to top to prevent header redirect errors) ---
+if (isset($_GET['delete'])) {
+    $id = mysqli_real_escape_string($link, $_GET['delete']);
+    
+    // Optional: Delete the guide's photo from the folder first
+    $res = mysqli_query($link, "SELECT profile_img FROM guides WHERE id='$id'");
+    $row = mysqli_fetch_assoc($res);
+    if($row && !empty($row['profile_img'])) {
+        @unlink("../images/" . $row['profile_img']);
+    }
+
+    mysqli_query($link, "DELETE FROM guides WHERE id='$id'");
+    header("Location: manage_guides.php");
+    exit(); // Always exit after a header redirect
+}
 
 $message = "";
 
-// --- 1. HANDLE ADD GUIDE ---
+// --- 3. HANDLE ADD GUIDE ---
 if (isset($_POST['add_guide'])) {
     $name = mysqli_real_escape_string($link, $_POST['name']);
     $email = mysqli_real_escape_string($link, $_POST['email']);
@@ -16,7 +31,6 @@ if (isset($_POST['add_guide'])) {
     $exp = mysqli_real_escape_string($link, $_POST['experience']);
     $bio = mysqli_real_escape_string($link, $_POST['bio']);
 
-    // Image Upload
     $img_name = $_FILES['image']['name'];
     $tmp_name = $_FILES['image']['tmp_name'];
     $target_file = "../images/" . $img_name;
@@ -33,16 +47,12 @@ if (isset($_POST['add_guide'])) {
     }
 }
 
-// --- 2. HANDLE DELETE (Added logic) ---
-if (isset($_GET['delete'])) {
-    $id = mysqli_real_escape_string($link, $_GET['delete']);
-    mysqli_query($link, "DELETE FROM guides WHERE id='$id'");
-    header("Location: manage_guides.php");
-    exit();
-}
-
-// --- 3. FETCH GUIDES ---
+// --- 4. FETCH GUIDES ---
 $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
+
+// --- 5. NOW INCLUDE THE UI ---
+include("../includes/header.php");
+include("../includes/sidebar.php");
 ?>
 
 <!DOCTYPE html>
@@ -57,19 +67,22 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
 
         /* --- LOGO VISIBILITY FIX --- */
         header {
-            left: 250px !important; /* Move header to the right of the sidebar */
-            width: calc(100% - 250px) !important; /* Prevent width overflow */
+            left: 250px !important;
+            width: calc(100% - 250px) !important;
             box-sizing: border-box;
         }
+
+        /* Forces Logo/Title Left and Logout/Links Right */
+        header > *:first-child { margin-right: auto !important; }
 
         .main-content { 
             margin-left: 250px; 
             padding: 40px; 
-            padding-top: 120px; /* Space so content starts below the header */
+            padding-top: 110px; 
             transition: margin-left 0.3s ease; 
         }
         
-        .form-section {
+        .form-section, .guide-list {
             background: white; padding: 25px; border-radius: 15px; margin-bottom: 30px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
@@ -78,35 +91,30 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
         
         input, select, textarea {
             width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px;
-            box-sizing: border-box;
+            box-sizing: border-box; font-family: inherit;
         }
 
         .btn-submit {
             background: #27ae60; color: white; border: none; padding: 12px 30px;
             border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: 600;
-            transition: 0.3s;
         }
-        .btn-submit:hover { background: #219150; }
 
-        /* Guide List Styling */
-        .guide-list { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #7f8c8d; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #7f8c8d; font-size: 0.85rem; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; vertical-align: middle; }
         
         .guide-thumb { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-        .spec-label { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; }
+        .spec-label { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 600; }
         
         .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
         
         .delete-link { color: #e74c3c; text-decoration: none; font-weight: bold; }
-        .delete-link:hover { color: #c0392b; }
 
         @media (max-width: 992px) { 
             header { left: 0 !important; width: 100% !important; }
-            .main-content { margin-left: 0; padding: 100px 15px 15px 15px; } 
+            .main-content { margin-left: 0; padding-top: 100px; } 
         }
     </style>
 </head>
@@ -117,8 +125,8 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
     <?php echo $message; ?>
 
     <div class="form-section">
-        <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-user-plus"></i> Register a New Guide</h3>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <h3 style="margin-top: 0;"><i class="fas fa-user-plus"></i> Register a New Guide</h3>
+        <form action="manage_guides.php" method="POST" enctype="multipart/form-data">
             <div class="input-grid">
                 <div>
                     <label>Full Name</label>
@@ -156,7 +164,7 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
 
             <div style="margin-top: 15px;">
                 <label>Brief Bio</label>
-                <textarea name="bio" rows="3" placeholder="Describe the guide's background..." required></textarea>
+                <textarea name="bio" rows="3" required></textarea>
             </div>
 
             <div style="margin-top: 15px;">
@@ -171,7 +179,7 @@ $result = mysqli_query($link, "SELECT * FROM guides ORDER BY name ASC");
     </div>
 
     <div class="guide-list">
-        <h3 style="margin-top: 0; color: #2c3e50;"><i class="fas fa-users"></i> Active Professional Guides</h3>
+        <h3 style="margin-top: 0;"><i class="fas fa-users"></i> Active Professional Guides</h3>
         <table>
             <thead>
                 <tr>
