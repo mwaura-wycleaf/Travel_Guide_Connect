@@ -149,9 +149,9 @@ TRAVEL_GUIDE_CONNECT/
   * **[mwaura-wycleaf](https://github.com/mwaura-wycleaf) (Lead Developer):**
       * Developed the full-stack logic for the **Traveler/User** module.
       * Designed the **Database Architecture** and Relational Schema.
-  * **[TracyNdiritu](https://www.google.com/search?q=https://github.com/TracyNdiritu):**
+  * **[TracyNdiritu](https://github.com/TracyNdiritu):**
       * Developed the **Administrative Panel** and system oversight features.
       * Implemented management systems for attractions, bookings, and user metrics.
-  * **[christon-mwash](https://www.google.com/search?q=https://github.com/christon-mwash):**
+  * **[christon-mwash](https://github.com/christon-mwash):**
       * Developed the **Professional Guide** Interface.
       * Implemented guide profile management, booking processing, and availability logic.
