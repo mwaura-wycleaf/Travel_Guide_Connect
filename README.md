@@ -120,8 +120,8 @@ TRAVEL_GUIDE_CONNECT/
 ### 3\. Database Initialization
 
   * **Access phpMyAdmin:** Open your browser to `http://localhost/phpmyadmin/`.
-  * **Create Database:** Create a new database exactly named `travel_db`.
-  * **Import Schema:** Select `travel_db`, click the **Import** tab, and browse to the SQL file:
+  * **Create Database:** Create a new database exactly named `travel_guide_connect`.
+  * **Import Schema:** Select `travel_guide_connect`, click the **Import** tab, and browse to the SQL file:
     `C:\xampp\htdocs\Travel_Guide_Connect/database/travel_guide.sql`.
   * **Execution:** Click **Go**. All tables should populate successfully.
 
