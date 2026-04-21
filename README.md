@@ -141,6 +141,13 @@ TRAVEL_GUIDE_CONNECT/
 
 -----
 
+### **Live Project**
+**URL:** http://travelguideconnect.free.nf/
+*This live demonstration is hosted on a production-grade LAMP environment, showcasing the application's stability, relational database performance, and mobile-responsive UI outside of the initial development environment.*
+### **Quick Deployment Note**
+> **Note:** Due to the free hosting tier, if the site fails to load, it may be undergoing brief server maintenance or have exceeded daily resource limits. For a persistent preview, refer to the local installation instructions below.
+>
+
 ### 👨‍💻 Project Development Team
 
 **Institution:** Dedan Kimathi University of Technology (DeKUT)  
